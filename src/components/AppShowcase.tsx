@@ -61,8 +61,8 @@ export default function AppShowcase() {
           
           const absDiff = Math.abs(diff);
           
-          // Cards shrink heavily when moving to sides
-          const scale = 1 - Math.min(0.3, absDiff * 0.15);
+          // Keep cards at the same size when moving to sides
+          const scale = 1;
           
           // Subtle blur on sides
           const blur = isMobile ? Math.min(3, absDiff * 3) : Math.min(5, absDiff * 3);

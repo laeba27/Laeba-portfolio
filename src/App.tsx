@@ -1,4 +1,4 @@
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'motion/react';
 import React, { useRef, useEffect, useState, CSSProperties } from 'react';
 import { Mail, Github, Linkedin, Instagram, ArrowDown } from 'lucide-react';
 import Navbar from './components/Navbar';
@@ -198,6 +198,66 @@ function MarqueeBanner() {
           </div>
         ))}
       </motion.div>
+    </div>
+  );
+}
+
+function FloatingIcons() {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const smoothX = useSpring(mouseX, { damping: 50, stiffness: 400 });
+  const smoothY = useSpring(mouseY, { damping: 50, stiffness: 400 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      // Normalize to -1 to 1 based on center of screen
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = (e.clientY / window.innerHeight) * 2 - 1;
+      mouseX.set(x);
+      mouseY.set(y);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
+
+  const icons = [
+    { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg", top: "15%", left: "15%", size: "w-12 h-12 md:w-16 md:h-16", speedX: 40, speedY: 25, delay: 0.1, rotation: -15 },
+    { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg", top: "20%", left: "80%", size: "w-10 h-10 md:w-14 md:h-14", speedX: -45, speedY: 30, delay: 0.2, rotation: 10 },
+    { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg", top: "80%", left: "18%", size: "w-14 h-14 md:w-20 md:h-20", speedX: 35, speedY: -35, delay: 0.3, rotation: 5 },
+    { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nextjs/nextjs-original.svg", top: "75%", left: "82%", size: "w-14 h-14 md:w-18 md:h-18", speedX: -30, speedY: -40, delay: 0.4, rotation: -10 },
+    { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg", top: "45%", left: "8%", size: "w-12 h-12 md:w-16 md:h-16", speedX: 50, speedY: 15, delay: 0.5, rotation: -5 },
+    { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/github/github-original.svg", top: "50%", left: "88%", size: "w-12 h-12 md:w-14 md:h-14", speedX: -40, speedY: 20, delay: 0.6, rotation: 15 },
+    { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/figma/figma-original.svg", top: "10%", left: "50%", size: "w-10 h-10 md:w-12 md:h-12", speedX: 20, speedY: 50, delay: 0.7, rotation: -20 },
+    { src: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vercel/vercel-original.svg", top: "85%", left: "50%", size: "w-10 h-10 md:w-12 md:h-12", speedX: -20, speedY: -50, delay: 0.8, rotation: 20 }
+  ];
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+      {icons.map((icon, i) => {
+        const x = useTransform(smoothX, [-1, 1], [-icon.speedX, icon.speedX]);
+        const y = useTransform(smoothY, [-1, 1], [-icon.speedY, icon.speedY]);
+
+        return (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, scale: 0.5, filter: 'blur(10px)', y: 30 }}
+            animate={{ opacity: 0.35, scale: 1, filter: 'blur(0px)', y: 0 }}
+            transition={{ duration: 1.8, delay: 0.8 + icon.delay, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute"
+            style={{
+              top: icon.top,
+              left: icon.left,
+              x,
+              y,
+              rotate: icon.rotation,
+            }}
+          >
+            <img src={icon.src} alt="Skill Icon" className={`${icon.size} object-contain`} style={{ filter: 'grayscale(0.3)' }} />
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
@@ -566,6 +626,10 @@ export default function App() {
 
       {/* Hero Section */}
       <section className="relative h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
+        
+        {/* Floating Icons Background (Full Screen) */}
+        <FloatingIcons />
+
         <motion.div 
           style={{ y: heroY }}
           className="text-center z-10 w-full max-w-5xl"
@@ -578,15 +642,24 @@ export default function App() {
             Portfolio 2026 / Volume I
           </motion.span>
           
-          <div className="mb-12 flex justify-center">
+          <div className="mb-4 flex justify-center relative">
             <SparkleText />
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1, duration: 1 }}
+            className="text-sm md:text-base font-sans tracking-[0.3em] font-medium text-ink/80 uppercase mb-8"
+          >
+            Full Stack Developer
+          </motion.div>
 
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.2 }}
-            className="text-lg italic font-serif opacity-70 max-w-lg mx-auto leading-relaxed"
+            className="text-lg italic font-serif opacity-70 max-w-lg mx-auto leading-relaxed relative z-10"
           >
             {HERO_TEXT.subtitle}
           </motion.p>
